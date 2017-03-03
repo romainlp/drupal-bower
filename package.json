@@ -1,13 +1,13 @@
 {
-  "name": "drupal-bower-install",
-  "version": "0.0.3",
-  "description": "Automatically create Drupal 8 libraries after a Bower install command.",
+  "name": "drupal-bower",
+  "version": "0.0.1",
+  "description": "Node module to automatically manage Drupal 8 libraries after a Bower install/uninstall command.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter spec"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "drupal-bower-install": "./bin/publish.js"
+    "DrupalBower": "./bin/drupal-bower.js"
   },
   "keywords": [
     "bower",
@@ -15,11 +15,16 @@
   ],
   "author": "Romain Le Polh <romainlepolh@gmail.com>",
   "license": "ISC",
-  "devDependencies": {
-    "chai": "^3.5.0",
+  "dependencies": {
     "interpret": "^1.0.1",
+    "js-yaml": "^3.8.2",
     "liftoff": "^2.3.0",
-    "minimist": "^1.2.0",
-    "mocha": "^3.2.0"
+    "minimist": "^1.2.0"
+  },
+  "devDependencies": {
+    "interpret": "^1.0.1",
+    "js-yaml": "^3.8.2",
+    "liftoff": "^2.3.0",
+    "minimist": "^1.2.0"
   }
 }
