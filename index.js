@@ -2,21 +2,30 @@
 
 const yaml = require('js-yaml');
 const fs = require('fs');
+const glob = require('glob');
+const path = require('path');
+const EventEmitter = require('events');
+class MyEmitter extends EventEmitter {
+  constructor() {
+    super();
+    this.eventsReady = [];
+  }
+}
+const myEmitter = new MyEmitter();
 
 var BowerDrupal = function() {
   this.vendorDir = null,
-  this.debug = true
+  this.debug = true,
+  this.librariesFile = null,
+  this.libraries = []
 }
-/**
- * Entry function
- */
+
 BowerDrupal.prototype.exec = function (action, env, assets) {
   this.setVendorDir(env.configFiles['.bower'].cwd)
   this.loadLibraries()
+  this.buildAssetList(assets)
 }
-/**
- * Get the vendor directory form .bowerrc file
- */
+
 BowerDrupal.prototype.setVendorDir = function (bowerFilePath) {
   var doc = yaml.safeLoad(fs.readFileSync(bowerFilePath), 'utf-8')
   if (doc.hasOwnProperty('directory')) {
@@ -24,16 +33,94 @@ BowerDrupal.prototype.setVendorDir = function (bowerFilePath) {
   } else {
     this.vendorDir = 'bower_components/'
   }
-  if (this.debug) {
-    console.log('Set vendorDir: ' + this.vendorDir)
-  }
 }
-/**
- * Load current libraries from drupal.libraries.yml file
- */
+
 BowerDrupal.prototype.loadLibraries = function () {
-  var filePattern = '*.libraries.yml'
-  var libraries = yaml.safeLoad(fs.readFileSyc)
+  var fileLibrariePattern = '*.libraries.yml'
+  var instance = this;
+  glob(fileLibrariePattern, {}, function (er, files) {
+    if (files.length === 0) {
+      console.log('Unable to find the libraries.yml file')
+      process.exit(0)
+    } else {
+      instance.librariesFile = files[0]
+      myEmitter.emit('assets_ready', instance, 'libraries');
+    }
+  })
 }
+
+BowerDrupal.prototype.buildAssetList = function(assets) {
+  var instance = this;
+  assets.forEach( function(element, index) {
+
+    var library = {};
+    var libraryPath = instance.vendorDir + element + '/';
+    var settings = JSON.parse(fs.readFileSync(libraryPath + 'bower.json'));
+    library.name = element.replace('.', '-');
+    library.version = settings.version;
+
+    if (settings.main !== undefined) {
+      if (Array.isArray(settings.main)) {
+        settings.main.forEach( function(element, index) {
+          var extension = path.extname(element).substring(1);
+          if (extension == 'js') {
+            if (library.js === undefined) {
+              library.js = {};
+            }
+            library.js[libraryPath + element] = {};
+          } else if (extension == 'css') {
+            if (library.css === undefined) {
+              library.css = { theme: {}};
+            }
+            library.css.theme[libraryPath + element] = {};
+          }
+        });
+      } else {
+        var extension = path.extname(settings.main).substring(1);
+        if (extension == 'js') {
+          library.js = {};
+          library.js[libraryPath + settings.main] = {};
+        } else if (extension == 'css') {
+          library.css = { theme: {}};
+          library.css.theme[libraryPath + settings.main] = {};
+
+        }
+      }
+    }
+    instance.libraries.push(library);
+
+  });
+  myEmitter.emit('assets_ready', this, 'assets');
+}
+
+BowerDrupal.prototype.updateFile = function() {
+  var instance = this;
+  var libraries = yaml.safeLoad(fs.readFileSync('./' + this.librariesFile));
+
+  this.libraries.forEach(function(element, index) {
+    var index = element.name;
+    delete element.name;
+    libraries[index] = element;
+
+
+  })
+
+  var yamlDump = yaml.safeDump(libraries);
+
+  fs.writeFile('./' + this.librariesFile, yamlDump, function(error) {
+    if (error) {
+      console.error("write error:  " + error.message);
+    } else {
+      console.log("Successful Write to " + instance.librariesFile);
+    }
+  });
+}
+
+myEmitter.on('assets_ready', function(instance, event_name) {
+  this.eventsReady.push(event_name);
+  if (this.eventsReady.indexOf('assets') !== -1 && this.eventsReady.indexOf('libraries') !== -1) {
+    instance.updateFile();
+  }
+})
 
 module.exports = new BowerDrupal();

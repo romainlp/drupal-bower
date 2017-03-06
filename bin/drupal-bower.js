@@ -12,6 +12,7 @@ var invoke = function(env) {
     console.log('Unable to locate .bowerrc file.')
     process.exit(0);
   }
+
   // Check the commands argv
   if (argv._.length == 0) {
     console.log('Use install of uninstall commads');

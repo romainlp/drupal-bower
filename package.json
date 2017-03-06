@@ -4,8 +4,8 @@
   "description": "Node module to automatically manage Drupal 8 libraries after a Bower install/uninstall command.",
   "main": "index.js",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/romainlp/drupal-bower"
+    "type": "git",
+    "url": "https://github.com/romainlp/drupal-bower"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,6 +20,7 @@
   "author": "Romain Le Polh <romainlepolh@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "glob": "^7.1.1",
     "interpret": "^1.0.1",
     "js-yaml": "^3.8.2",
     "liftoff": "^2.3.0",
