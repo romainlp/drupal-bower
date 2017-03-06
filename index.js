@@ -17,34 +17,63 @@ var BowerDrupal = function() {
   this.vendorDir = null,
   this.debug = true,
   this.librariesFile = null,
-  this.libraries = []
+  this.libraries = [],
+  this.action = null
 }
 
-BowerDrupal.prototype.exec = function (action, env, assets) {
-  this.setVendorDir(env.configFiles['.bower'].cwd)
-  this.loadLibraries()
-  this.buildAssetList(assets)
+BowerDrupal.prototype.exec = function (action, env, libraries) {
+  this.setVendorDir(env.configFiles['.bower'].cwd);
+  this.loadLibraries();
+  this.action = action;
+  this.argv = libraries;
+
+  if (this.action === 'install') {
+    this.buildAssetList(libraries);
+  } else if (this.action === 'uninstall') {
+    this.uninstallLibraries(libraries);
+  }
 }
 
 BowerDrupal.prototype.setVendorDir = function (bowerFilePath) {
-  var doc = yaml.safeLoad(fs.readFileSync(bowerFilePath), 'utf-8')
+  var doc = yaml.safeLoad(fs.readFileSync(bowerFilePath), 'utf-8');
   if (doc.hasOwnProperty('directory')) {
-    this.vendorDir = doc.directory
+    this.vendorDir = doc.directory;
   } else {
-    this.vendorDir = 'bower_components/'
+    this.vendorDir = 'bower_components/';
   }
 }
 
 BowerDrupal.prototype.loadLibraries = function () {
-  var fileLibrariePattern = '*.libraries.yml'
+  var fileLibrariePattern = '*.libraries.yml';
   var instance = this;
   glob(fileLibrariePattern, {}, function (er, files) {
     if (files.length === 0) {
-      console.log('Unable to find the libraries.yml file')
-      process.exit(0)
+      console.log('Unable to find the libraries.yml file');
+      process.exit(0);
     } else {
-      instance.librariesFile = files[0]
+      instance.librariesFile = files[0];
       myEmitter.emit('assets_ready', instance, 'libraries');
+    }
+  })
+}
+
+BowerDrupal.prototype.uninstallLibraries = function (libraries) {
+  myEmitter.on('assets_ready', function(instance) {
+    if (instance.action === 'uninstall') {
+      libraries.forEach( function(element, index) {
+        var index = element.replace('.', '-');
+        var currentLibraries = yaml.safeLoad(fs.readFileSync('./' + instance.librariesFile));
+        delete currentLibraries[index];
+        var yamlDump = yaml.safeDump(currentLibraries);
+
+        fs.writeFile('./' + instance.librariesFile, yamlDump, function(error) {
+          if (error) {
+            console.error("write error:  " + error.message);
+          } else {
+            console.log("Successful Write to " + instance.librariesFile);
+          }
+        });
+      });
     }
   })
 }
@@ -101,8 +130,6 @@ BowerDrupal.prototype.updateFile = function() {
     var index = element.name;
     delete element.name;
     libraries[index] = element;
-
-
   })
 
   var yamlDump = yaml.safeDump(libraries);

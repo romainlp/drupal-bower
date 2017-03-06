@@ -23,5 +23,5 @@ Update your .bowerrc file with those lines:
 
 ## Todos
 
-- Uninstall not implemented yet
 - Manage dependencies
+- Refacto (First node module, a little bit messy)
