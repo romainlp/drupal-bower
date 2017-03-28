@@ -1,6 +1,6 @@
 {
   "name": "drupal-bower",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Node module to automatically manage Drupal 8 libraries after a Bower install/uninstall command.",
   "main": "index.js",
   "repository": {
