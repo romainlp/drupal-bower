@@ -86,6 +86,9 @@ BowerDrupal.prototype.buildAssetList = function(assets) {
     var libraryPath = instance.vendorDir + element + '/';
     var settings = JSON.parse(fs.readFileSync(libraryPath + 'bower.json'));
     library.name = element.replace('.', '-');
+    if (settings.version === undefined) {
+        settings = JSON.parse(fs.readFileSync(libraryPath + '.bower.json'));
+    }
     library.version = settings.version;
 
     if (settings.main !== undefined) {
