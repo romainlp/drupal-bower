@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-var Liftoff = require('liftoff');
-var argv = require('minimist')(process.argv.slice(2));
-var DrupalBower = require('../');
+let Liftoff = require('liftoff');
+let argv = require('minimist')(process.argv.slice(2));
+let DrupalBower = require('../');
 
-var invoke = function(env) {
+let invoke = function(env) {
   // Check if there is a .bowerrc file
   // @todo Check all bowerrc file available
   // @see https://bower.io/docs/config/
@@ -37,5 +37,4 @@ const Cli = new Liftoff({
   v8flags: ['--harmony']
 });
 
-Cli.launch({
-}, invoke);
+Cli.launch({}, invoke);

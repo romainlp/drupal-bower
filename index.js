@@ -13,7 +13,7 @@ class MyEmitter extends EventEmitter {
 }
 const myEmitter = new MyEmitter();
 
-var BowerDrupal = function() {
+const BowerDrupal = function() {
   this.vendorDir = null,
   this.debug = true,
   this.librariesFile = null,
@@ -35,7 +35,7 @@ BowerDrupal.prototype.exec = function (action, env, libraries) {
 }
 
 BowerDrupal.prototype.setVendorDir = function (bowerFilePath) {
-  var doc = yaml.safeLoad(fs.readFileSync(bowerFilePath), 'utf-8');
+  let doc = yaml.safeLoad(fs.readFileSync(bowerFilePath), 'utf-8');
   if (doc.hasOwnProperty('directory')) {
     this.vendorDir = doc.directory;
   } else {
@@ -44,8 +44,8 @@ BowerDrupal.prototype.setVendorDir = function (bowerFilePath) {
 }
 
 BowerDrupal.prototype.loadLibraries = function () {
-  var fileLibrariePattern = '*.libraries.yml';
-  var instance = this;
+  let fileLibrariePattern = '*.libraries.yml';
+  let instance = this;
   glob(fileLibrariePattern, {}, function (er, files) {
     if (files.length === 0) {
       console.log('Unable to find the libraries.yml file');
@@ -61,10 +61,10 @@ BowerDrupal.prototype.uninstallLibraries = function (libraries) {
   myEmitter.on('assets_ready', function(instance) {
     if (instance.action === 'uninstall') {
       libraries.forEach( function(element, index) {
-        var index = element.replace('.', '-');
-        var currentLibraries = yaml.safeLoad(fs.readFileSync('./' + instance.librariesFile));
+        let index = element.replace('.', '-');
+        let currentLibraries = yaml.safeLoad(fs.readFileSync('./' + instance.librariesFile));
         delete currentLibraries[index];
-        var yamlDump = yaml.safeDump(currentLibraries);
+        let yamlDump = yaml.safeDump(currentLibraries);
 
         fs.writeFile('./' + instance.librariesFile, yamlDump, function(error) {
           if (error) {
@@ -79,12 +79,12 @@ BowerDrupal.prototype.uninstallLibraries = function (libraries) {
 }
 
 BowerDrupal.prototype.buildAssetList = function(assets) {
-  var instance = this;
+  let instance = this;
   assets.forEach( function(element, index) {
 
-    var library = {};
-    var libraryPath = instance.vendorDir + element + '/';
-    var settings = JSON.parse(fs.readFileSync(libraryPath + 'bower.json'));
+    let library = {};
+    let libraryPath = instance.vendorDir + element + '/';
+    let settings = JSON.parse(fs.readFileSync(libraryPath + 'bower.json'));
     library.name = element.replace('.', '-');
     if (settings.version === undefined) {
         settings = JSON.parse(fs.readFileSync(libraryPath + '.bower.json'));
@@ -94,7 +94,7 @@ BowerDrupal.prototype.buildAssetList = function(assets) {
     if (settings.main !== undefined) {
       if (Array.isArray(settings.main)) {
         settings.main.forEach( function(element, index) {
-          var extension = path.extname(element).substring(1);
+          let extension = path.extname(element).substring(1);
           if (extension == 'js') {
             if (library.js === undefined) {
               library.js = {};
@@ -108,7 +108,7 @@ BowerDrupal.prototype.buildAssetList = function(assets) {
           }
         });
       } else {
-        var extension = path.extname(settings.main).substring(1);
+        let extension = path.extname(settings.main).substring(1);
         if (extension == 'js') {
           library.js = {};
           library.js[libraryPath + settings.main] = {};
@@ -126,16 +126,16 @@ BowerDrupal.prototype.buildAssetList = function(assets) {
 }
 
 BowerDrupal.prototype.updateFile = function() {
-  var instance = this;
-  var libraries = yaml.safeLoad(fs.readFileSync('./' + this.librariesFile));
+  let instance = this;
+  let libraries = yaml.safeLoad(fs.readFileSync('./' + this.librariesFile));
 
   this.libraries.forEach(function(element, index) {
-    var index = element.name;
+    let index = element.name;
     delete element.name;
     libraries[index] = element;
   })
 
-  var yamlDump = yaml.safeDump(libraries);
+  let yamlDump = yaml.safeDump(libraries);
 
   fs.writeFile('./' + this.librariesFile, yamlDump, function(error) {
     if (error) {
